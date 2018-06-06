@@ -1,0 +1,10 @@
+{
+  "name": "game",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "author": "",
+  "dependencies": {
+    "phaser": "^3.9.0"
+  }
+}
