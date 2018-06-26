@@ -51,7 +51,8 @@ class Game extends Phaser.State {
     this.asteroids = this.add.group();
     const earthRadius = gameOptions.earthRadius * this.screenWidthRatio;
     // const earth = this.add.sprite(this.world.width / 2, this.world.height / 3 * 2, 'earth');
-    const earth = this.add.sprite(gameOptions.width / 2, -gameOptions.height / 3, 'earth');
+    const earth = this.add.sprite(gameOptions.width / 2, -gameOptions.height * 0.22, 'sat2');
+    earth.scale.set(this.screenWidthRatio * 0.1);
     earth.anchor.setTo(0.5, 0.5);
     earth.radius = earthRadius;
     earth.width = earthRadius * 2;
@@ -59,8 +60,8 @@ class Game extends Phaser.State {
 
     // 生成火箭
     // const rocket = this.add.sprite(this.world.width / 2, this.world.height / 3 * 2 - earthRadius, 'rocket');
-    const rocket = this.add.sprite(gameOptions.width / 2, -gameOptions.height / 3 - earthRadius, 'rocket');
-    rocket.anchor.set(0.5, 0.52);
+    const rocket = this.add.sprite(gameOptions.width / 2, -gameOptions.height / 3 * 2 - earthRadius, 'rocket');
+    rocket.anchor.set(0.5, 0.55);
     // 调节行星生成，避免出界
 		rocket.radius = 15;
     rocket.scale.set(0.25);
@@ -79,6 +80,7 @@ class Game extends Phaser.State {
     // 生成火焰
     const fire = this.add.sprite(0, -gameOptions.height / 10, 'fire');
     fire.width = gameOptions.width;
+    fire.height = gameOptions.height / 3 * 2;
     this.physics.arcade.enable(fire);
     fire.body.immovable = true;
     this.fire = fire;
@@ -87,14 +89,14 @@ class Game extends Phaser.State {
     const dust = this.add.emitter();
 		dust.makeParticles(['particle1', 'particle2']);
 		dust.gravity = 200;
-		dust.setAlpha(1, 0, 2000, Phaser.Easing.Quintic.Out);
+		dust.setAlpha(1, 0, 3000, Phaser.Easing.Quintic.Out);
     this.dust = dust;
     
     // 分数，放到后面，越晚加入越在上层
     const scoreText = this.add.text(
       gameOptions.width - 20,
       10,
-      'Score: ' + this.score, 
+      '分数 ' + this.score, 
       {
         font: this.screenWidthRatio * 30 + 'px Arial', 
         fill: '#ffffff'
@@ -169,7 +171,7 @@ class Game extends Phaser.State {
       const values = getValue();
       this.asteroids.add(this.generateOneAsteroid(
         this.world.width / 2, 
-        - gameOptions.height / 2 - 2 * values.radius, 
+        - gameOptions.height * 0.4 - 2 * values.radius, 
         values.radius, 
         values.rotationSpeed
       ));
@@ -197,10 +199,10 @@ class Game extends Phaser.State {
   generateOneAsteroid(x, y, radius, rotationSpeed) {
     const rnd = Math.random();
     let oneAsteroid;
-    // oneAsteroid = this.add.sprite(x, y, 'moon');
-    if (rnd < 1 / 3) {
+    // 设定生成不同小行星的概率
+    if (rnd < 1 / 4) {
       oneAsteroid = this.add.sprite(this.screenWidthRatio * x, y, 'sat1');
-    } else if (rnd < 3 / 5) {
+    } else if (rnd < 1 / 2) {
       oneAsteroid = this.add.sprite(this.screenWidthRatio * x, y, 'sat2');
     } else {
       oneAsteroid = this.add.sprite(this.screenWidthRatio * x, y, 'sat3');
@@ -274,9 +276,9 @@ class Game extends Phaser.State {
           dust.y = asteroid.y + 
             (asteroid.width * 0.5 + this.rocket.radius) * 
             Math.sin(this.rocket.landed.angle + asteroid.rotation);
-          dust.start(true, 500, 0, 20, true);
+          dust.start(true, 2000, 0, 20, true);
           this.score = Math.floor(-rocket.y + gameOptions.scoreInit);
-          this.scoreText.setText('Score: ' + this.score);
+          this.scoreText.setText('分数 ' + this.score);
         }
       });
       

@@ -6,10 +6,7 @@ export default class Music {
     this.bgmAudio.src = 'audio/music.mp3';
 
     this.jumpAudio = new Audio();
-    this.jumpAudio.src = 'audio/jump.wav';
-
-    this.boomAudio = new Audio();
-    this.boomAudio.src = 'audio/explosion.mp3';
+    this.jumpAudio.src = 'audio/jump.mp3';
   }
 
   playBgm() {
@@ -18,9 +15,5 @@ export default class Music {
 
   playJump() {
     this.jumpAudio.play();
-  }
-
-  playBoom() {
-    this.boomAudio.play();
   }
 }

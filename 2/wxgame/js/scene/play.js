@@ -16,14 +16,15 @@ export default class Play extends Phaser.State {
 
     // 物理引擎
     // 上下要对称
-    this.world.setBounds(0, -1000000, 480, 1000000);
+    this.world.setBounds(0, -1000000, gameOptions.width, 1000000);
     this.physics.startSystem(Phaser.Physics.ARCADE);
 
     // 初始化参数
     this.score = gameOptions.scoreInit;
     this.gravity = gameOptions.gravity;
-    this.screenWidthRatio = gameOptions.width / 480;
-    this.screenHeightRatio = gameOptions.height / 640;
+    // 比例系数
+    this.screenWidthRatio = gameOptions.width / 375;
+    this.screenHeightRatio = gameOptions.height / 812;
 
     // 生成sprite
     // 星星闪烁
@@ -40,14 +41,15 @@ export default class Play extends Phaser.State {
 		for(let lr of ['left', 'right']) {
       let wall;
 			if (lr === 'left') {
-				wall = this.add.graphics(- gameOptions.rectWidth + gameOptions.wallWidth, 0);
+        wall = this.add.graphics(- gameOptions.rectWidth + gameOptions.wallWidth, 0);
 				wall.type = 'l';
 			} else {
-				wall = this.add.graphics(this.camera.view.width - gameOptions.wallWidth , 0);
+        //this.camera.view.width
+				wall = this.add.graphics(gameOptions.width - gameOptions.wallWidth, 0);
 				wall.type = 'r';
 			}
-			wall.beginFill(0xFFFFFF);
-			wall.drawRect(0, 0, 100, this.camera.view.height);
+			wall.beginFill(0xEEEEEE);
+      wall.drawRect(0, 0, gameOptions.rectWidth, gameOptions.height);
 			wall.endFill();
 			this.physics.arcade.enable(wall);
 			wall.body.immovable = true;
@@ -59,7 +61,8 @@ export default class Play extends Phaser.State {
     this.asteroids = this.add.group();
     const earthRadius = gameOptions.earthRadius * this.screenWidthRatio;
     // const earth = this.add.sprite(this.world.width / 2, this.world.height / 3 * 2, 'earth');
-    const earth = this.add.sprite(gameOptions.width / 2, -gameOptions.height / 3, 'earth');
+    const earth = this.add.sprite(gameOptions.width / 2, -gameOptions.height * 0.22, 'sat2');
+    earth.scale.set(this.screenWidthRatio * 0.1);
     earth.anchor.setTo(0.5, 0.5);
     earth.radius = earthRadius;
     earth.width = earthRadius * 2;
@@ -67,11 +70,11 @@ export default class Play extends Phaser.State {
 
     // 生成火箭
     // const rocket = this.add.sprite(this.world.width / 2, this.world.height / 3 * 2 - earthRadius, 'rocket');
-    const rocket = this.add.sprite(gameOptions.width / 2, -gameOptions.height / 3 - earthRadius, 'rocket');
+    const rocket = this.add.sprite(gameOptions.width / 2, -gameOptions.height / 3 * 2 - earthRadius, 'rocket');
     rocket.anchor.set(0.5, 0.52);
     // 调节行星生成，避免出界
 		rocket.radius = 15;
-    rocket.scale.set(0.25);
+    rocket.scale.set(0.15 * this.screenWidthRatio);
     this.physics.arcade.enable(rocket);
     // 着陆星球
     rocket.landed = {
@@ -87,6 +90,7 @@ export default class Play extends Phaser.State {
     // 生成火焰
     const fire = this.add.sprite(0, -gameOptions.height / 10, 'fire');
     fire.width = gameOptions.width;
+    fire.height = gameOptions.height / 3 * 2;
     this.physics.arcade.enable(fire);
     fire.body.immovable = true;
     this.fire = fire;
@@ -95,14 +99,13 @@ export default class Play extends Phaser.State {
     const dust = this.add.emitter();
 		dust.makeParticles(['particle1', 'particle2']);
 		dust.gravity = 200;
-		dust.setAlpha(1, 0, 2000, Phaser.Easing.Quintic.Out);
+		dust.setAlpha(1, 0, 3000, Phaser.Easing.Quintic.Out);
     this.dust = dust;
     
     // 分数，放到后面，越晚加入越在上层
     const scoreText = this.add.text(
-      20,
-      20,
-      'Score: ' + this.score, 
+      20, 50,
+      '分数 ' + this.score, 
       {
         font: this.screenWidthRatio * 30 + 'px Arial', 
         fill: '#ffffff'
@@ -113,9 +116,7 @@ export default class Play extends Phaser.State {
     this.scoreText = scoreText;
 
     // 点击交互
-		this.input.onDown.add(() => {
-			this.jump();
-    });
+		this.input.onDown.add(this.jump, this);
   }
 
   jump() {
@@ -175,7 +176,7 @@ export default class Play extends Phaser.State {
       const values = getValue();
       this.asteroids.add(this.generateOneAsteroid(
         this.world.width / 2, 
-        - gameOptions.height / 2 - 2 * values.radius, 
+        - gameOptions.height * 0.4 - 2 * values.radius, 
         values.radius, 
         values.rotationSpeed
       ));
@@ -204,9 +205,9 @@ export default class Play extends Phaser.State {
     const rnd = Math.random();
     let oneAsteroid;
     // oneAsteroid = this.add.sprite(x, y, 'moon');
-    if (rnd < 1 / 3) {
+    if (rnd < 1 / 4) {
       oneAsteroid = this.add.sprite(this.screenWidthRatio * x, y, 'sat1');
-    } else if (rnd < 3 / 5) {
+    } else if (rnd < 1 / 2) {
       oneAsteroid = this.add.sprite(this.screenWidthRatio * x, y, 'sat2');
     } else {
       oneAsteroid = this.add.sprite(this.screenWidthRatio * x, y, 'sat3');
@@ -280,9 +281,9 @@ export default class Play extends Phaser.State {
           dust.y = asteroid.y + 
             (asteroid.width * 0.5 + this.rocket.radius) * 
             Math.sin(this.rocket.landed.angle + asteroid.rotation);
-          dust.start(true, 500, 0, 20, true);
+          dust.start(true, 2000, 0, 20, true);
           this.score = Math.floor(-rocket.y + gameOptions.scoreInit);
-          this.scoreText.setText('Score: ' + this.score);
+          this.scoreText.setText('分数 ' + this.score);
         }
       });
       
@@ -293,10 +294,10 @@ export default class Play extends Phaser.State {
           this.rocket.body.gravity.y = gameOptions.gravity;
           // 左墙
           if (wall.type === 'l') {
-            this.rocket.x = wall.x + wall.width + this.rocket.radius - 2;
+            this.rocket.x = wall.x + wall.width + this.rocket.radius - 3;
             this.rocket.rotation = Math.PI / 2;
           } else if (wall.type === 'r'){
-            this.rocket.x = wall.x - this.rocket.radius + 2;
+            this.rocket.x = wall.x - this.rocket.radius + 3;
             this.rocket.rotation = - Math.PI / 2;
           }
           this.rocket.body.velocity.x = 0;
@@ -311,7 +312,6 @@ export default class Play extends Phaser.State {
 
   gameover() {
     // wxgame修改
-    this.music.playBoom();
     gameOptions.score = this.score;
     const bestScore = localStorage.getItem('bestScore');
     if (!bestScore || bestScore < this.score) {

@@ -20,35 +20,40 @@ export default class Restart extends Phaser.State {
     skybox.height = gameOptions.height;
     const twinkle = skybox.animations.add('twinkle');
     skybox.animations.play('twinkle', 3, true);
-    // 地球
-    const earth = this.add.sprite(gameOptions.width / 2, gameOptions.height / 3 * 2, 'earth');
-    earth.scale.set(screenHeightRatio);
-    earth.anchor.setTo(0.5, 0.5);
-    // 火焰
-    const fire = this.add.sprite(0, gameOptions.height / 3 * 2, 'fire');
+    // 空间站
+    const station = this.add.sprite(gameOptions.width / 2, gameOptions.height / 2, 'station');
+    station.scale.set(screenHeightRatio * 0.5);
+    station.anchor.setTo(0.5, 0.5);
+    this.add.tween(station).to(
+      { rotation: Math.PI * 2 },
+      5000,
+      Phaser.Easing.Linear.Default,
+      true, 0, -1);
+    // 下方火焰
+    const fire = this.add.sprite(0, gameOptions.height * 0.98, 'fire');
     fire.width = gameOptions.width;
-    this.add.tween(fire).to( 
-      {y: gameOptions.height / 5 * 3}, 
-      1000, 
-      Phaser.Easing.Sinusoidal.InOut, 
+    this.add.tween(fire).to(
+      { y: gameOptions.height * 0.9 },
+      1000,
+      Phaser.Easing.Sinusoidal.InOut,
       true, 0, -1, true);
     // GameOver
     const gameover = this.add.sprite(gameOptions.width / 2, 0, 'over');
-    gameover.width *= screenWidthRatio;
-    gameover.height *= 0.8 * screenHeightRatio;
+    gameover.width *= 0.9 * screenWidthRatio;
+    gameover.height *= 0.75 * screenHeightRatio;
 		gameover.anchor.x = 0.5;
 		this.add.tween(gameover).to( 
       {y: gameOptions.height / 8}, 
-      1000, 
+      1500, 
       Phaser.Easing.Bounce.Out, 
       true
     );
     // 得分
     const bestScore = localStorage.getItem('bestScore');
     const scoreText = this.add.text(
-      20 * screenWidthRatio, 
-      gameOptions.height / 7 * 6 - 10 * screenHeightRatio, 
-      'Score: ' + gameOptions.score + '\nBest Score: ' + bestScore, 
+      50 * screenWidthRatio, 
+      gameOptions.height / 6 * 5, 
+      '本局得分 ' + gameOptions.score + '\n历史最高 ' + bestScore, 
       { 
         font: "40px Arial", 
         fill: "#ffffff"
@@ -60,10 +65,10 @@ export default class Restart extends Phaser.State {
 
     const restart = this.add.sprite(
       gameOptions.width - 80 * screenWidthRatio, 
-      gameOptions.height / 7 * 6 - 10 * screenHeightRatio - 10, 
+      gameOptions.height / 6 * 5, 
       'restart'
     );
-		restart.scale.setTo(0.6 * screenWidthRatio);
+		restart.scale.setTo(0.35 * screenWidthRatio);
 		restart.anchor.x = 0.5;
 		restart.anchor.y = 0.5;
     // restart.alpha = 0;
@@ -75,10 +80,6 @@ export default class Restart extends Phaser.State {
     
     // wxgame修改
     this.input.onDown.add(this.restart, this);
-    // restart.inputEnabled = true;
-    // restart.events.onInputDown.add(function () {
-    //   this.restart();
-    // }, this);
   }
 
   restart() {
